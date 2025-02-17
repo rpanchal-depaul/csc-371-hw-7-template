@@ -1,0 +1,105 @@
+name: Autograding Tests
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+    types: [test_result]
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: [self-hosted, macOS]
+    if: github.actor != 'github-classroom[bot]'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: buildProject
+      id: buildProject
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: buildProject
+        setup-command: ''
+        command: xcodebuild build -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5'
+        timeout: 60
+        max-score: 0
+
+    - name: testContainsTabView
+      id: testContainsTabView
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testContainsTabView
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testContainsTabView | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+
+    - name: testTabViewContainsAllThreeViews
+      id: testTabViewContainsAllThreeViews
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testTabViewContainsAllThreeViews
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testTabViewContainsAllThreeViews | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+
+    - name: testAllElementsExist
+      id: testAllElementsExist
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testAllElementsExist
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testAllElementsExist | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+    
+    - name: testLabelValidation
+      id: testLabelValidation
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testLabelValidation
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testLabelValidation | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+
+    - name: testStepperChangesLabel
+      id: testStepperChangesLabel
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testStepperChangesLabel
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testStepperChangesLabel | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+
+    - name: testStandardFlow01
+      id: testStandardFlow01
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: testStandardFlow01
+        setup-command: ''
+        command: xcodebuild test -project HW467.xcodeproj -scheme HW467 -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.5' -only-testing:HW467UITests/HW7UITests/testStandardFlow01 | grep -q "Executed 1 test, with 0 failures"
+        timeout: 60
+        max-score: 10
+
+    # Grading
+          
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TESTCONTAINSTABVIEW_RESULTS: "${{steps.testContainsTabView.outputs.result}}"
+        TESTTABVIEWCONTAINSALLTHREEVIEWS_RESULTS: "${{steps.testTabViewContainsAllThreeViews.outputs.result}}"
+        TESTALLELEMENTSEXIST_RESULTS: "${{steps.testAllElementsExist.outputs.result}}"
+        TESTLABELVALIDATION_RESULTS: "${{steps.testLabelValidation.outputs.result}}"
+        TESTSTEPPERCHANGESLABEL_RESULTS: "${{steps.testStepperChangesLabel.outputs.result}}"
+        TESTSTANDARDFLOW01_RESULTS: "${{steps.testStandardFlow01.outputs.result}}"
+
+      with:
+        runners: testContainsTabView,testTabViewContainsAllThreeViews,testAllElementsExist,testLabelValidation,testStepperChangesLabel,testStandardFlow01
